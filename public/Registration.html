@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Registration page</title>
+<style>
+label{
+width: 8em;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block
+}
+input
+{
+width:200px;
+}
+
+#div1 {width:350px;height:150px;padding:10px;border:1px solid #aaaaaa;}
+
+</style>
+</head>
+<body>
+<h1 align="center">Registration</h1><hr><br><br><br>
+<form id="regisform">
+<label>First name:</label><input type="text" name="firstname" id="firstname" onkeypress="hideSavedInfo()"placeholder="Enter first name">
+<br><br>
+<label>Last name:</label><input type="text" name="lastname" id="lastname" placeholder="Enter last name"><br><br>
+<label>Email:</label><input type="email" id="email" name="email"><br><br>
+<label>SSN:</label><input type="text" name="ssn" id="ssn" pattern="(!^\d{3}-\d{2}-\d{4}$" title="The Social Security Number"><br><br>
+<label>Phone:</label><input type="text" name="phoneno" id="phoneno" pattern="\d{3}[\-]\d{3}[\-]\d{4}"><br><br>
+<label>Age:</label><input type="text" name="age" id="age"><br><br>
+<label>Sex:</label><input type="text" name="sex" id="sex" placeholder="Enter F or M"><br><br>
+<label>URL:</label><input type="text" name="url" id="url"><br><br>
+<label>Password:</label><input type="password" name="password" id="password" onkeyup="passwordStrength();" maxlength="24">&emsp;
+<img src="question.jpg" width="20" height="20" title="Password must contain 3 uppercase,2 lower case and 2 special chars" height="42" width="42">&emsp;
+<span id="strength"></span>&emsp;<progress id="progressbar" value="0" max="100"></progress>
+<br><br>
+<label>Confirm Password:</label><input type="password" id="confirmpwd" name="confirmpwd" placeholder="Must be same as your password"><br><br>
+<label>D.O.B:</label><input type="date" name="date" id="date"><br><br>
+<label>D.O.B with time:</label><input type="datetime" name="dobdt" id="dobdt"><br><br>
+<label>Credit Card No:</label><input type="text" name="creditcardno" id="creditcardno" pattern="[0-9]{13,16}"><br><br>
+<input type="button" value="Save" id="select_link" style="margin-left:9%;">
+
+<p><b>Drag the Apple/banana/cherry image into the rectangle to enable the save button:</b></p>
+<img id="drag1" src="/images/Red_Apple.jpg" draggable="true" ondragstart="drag(event)" width="336" height="150">
+<img id="drag2" src="/images/Banana.jpg" draggable="true" ondragstart="drag(event)" width="336" height="150">
+<img id="drag3" src="/images/cherries.jpg" draggable="true" ondragstart="drag(event)" width="336" height="150"> <br><br><br>
+<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)" style="margin-left:10%"></div>
+<br>
+
+
+</form>
+<script src="/javascripts/modernizr.custom.69424.js"></script>
+<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>		
+<Script src ="/javascripts/RegistrnData.js"></Script>
+<script>
+document.getElementById("progressbar").style.visibility="hidden";
+document.getElementById("select_link").disabled=true;
+
+function allowDrop(ev) {
+document.getElementById("div1").innerHTML="";
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.appendChild(document.getElementById(data));
+	document.getElementById("select_link").disabled=false;
+}
+
+ $(function(){				
+                $('#select_link').click(function(e){
+                    e.preventDefault();
+                    console.log('select_link clicked');
+					saveJSObj();
+					$.ajax({
+						type: 'POST',
+						data: JSON.stringify(formValue),
+				        contentType: 'application/json',
+                        url: 'http://localhost:3000/endpoint',						
+                        success: function(data) {
+                            console.log('success');
+                            console.log(JSON.stringify(formValue));
+							location.reload();
+							alert("Your registration information is saved to database successfully");
+                        }
+                    });
+
+                });
+					
+            });
+
+
+if (!Modernizr.localstorage) {
+	alert("No Local Storage available");
+}
+
+function passwordStrength()
+{
+document.getElementById("progressbar").style.visibility="visible";	
+document.getElementById("strength").innerHTML = "";
+document.getElementById("progressbar").value=0;
+var pwdEntered = document.getElementById("password").value;
+var lowerCasePtrn = /^[a-z]+$/;
+var upperCasePtrn = /^[A-Z]+$/;
+var numberPtrn = /^[0-9]+$/;
+var splCharPtrn = /^[!@#$%^&*)(\-+=_`~<>,.?/|{}\[\]]+$/; /* /^[!@#\$%\^\&*\)\(\-\+]+$/; */
+var i;
+var counter =0
+var splCharCntr=0;
+
+for(i=0;i<pwdEntered.length;i++)
+	{
+	if(lowerCasePtrn.test(pwdEntered[i]))
+		{
+		counter++;
+		}
+	if(upperCasePtrn.test(pwdEntered[i]))
+		{
+		counter = counter+1;
+		}
+	if(splCharPtrn.test(pwdEntered[i]))
+		{
+		splCharCntr++;
+		}
+	}
+	if(counter==5||counter>5 && splCharCntr==2 )
+		{
+		document.getElementById("progressbar").value=30;
+		document.getElementById("strength").innerHTML = "Normal";
+		}
+	else if(counter==5||counter>5 && splCharCntr>3 && splCharCntr<=5)
+		{
+		document.getElementById("progressbar").value=70;
+		document.getElementById("strength").innerHTML = "Medium";
+		}
+	else if(counter==5||counter>5 && splCharCntr>5)
+	{
+	document.getElementById("progressbar").value=100;
+	document.getElementById("strength").innerHTML = "Strong";
+	}
+	else
+	{
+	document.getElementById("strength").innerHTML = "Low";	
+	}
+}
+
+</script>
+</body>
+</html>
